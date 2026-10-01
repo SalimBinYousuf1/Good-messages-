@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.data.local.SalimDatabase
 import com.example.data.repository.ContactsRepository
 import com.example.data.repository.SmsRepository
+import com.example.data.repository.SystemSmsSync
 import com.example.notification.NotificationHelper
 import com.example.telephony.SmsSender
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +19,15 @@ class SalimApplication : Application() {
     val database by lazy { SalimDatabase.getInstance(this) }
     val contactsRepository by lazy { ContactsRepository(this) }
     val smsSender by lazy { SmsSender(this) }
+    val systemSmsSync by lazy {
+        SystemSmsSync(
+            context = this,
+            conversationDao = database.conversationDao(),
+            messageDao = database.messageDao(),
+            contactsRepository = contactsRepository
+        )
+    }
+
     val smsRepository by lazy {
         SmsRepository(
             context = this,
@@ -25,7 +35,8 @@ class SalimApplication : Application() {
             messageDao = database.messageDao(),
             blockedNumberDao = database.blockedNumberDao(),
             contactsRepository = contactsRepository,
-            smsSender = smsSender
+            smsSender = smsSender,
+            systemSmsSync = systemSmsSync
         )
     }
 
@@ -34,10 +45,8 @@ class SalimApplication : Application() {
         instance = this
         NotificationHelper.createNotificationChannels(this)
 
-        // Seed demo data on initial launch so the user has immediate rich conversations
-        applicationScope.launch {
-            smsRepository.seedDemoDataIfEmpty()
-        }
+        // Start real system SMS sync and real-time ContentObserver
+        systemSmsSync.startObserving(applicationScope)
     }
 
     companion object {

@@ -21,8 +21,13 @@ class SmsRepository(
     private val messageDao: MessageDao,
     private val blockedNumberDao: BlockedNumberDao,
     private val contactsRepository: ContactsRepository,
-    private val smsSender: SmsSender
+    private val smsSender: SmsSender,
+    private val systemSmsSync: SystemSmsSync? = null
 ) {
+
+    suspend fun syncRealSystemMessages(): Int = withContext(Dispatchers.IO) {
+        systemSmsSync?.syncSystemMessages() ?: 0
+    }
 
     fun getConversations(isArchived: Boolean = false, isSpam: Boolean = false): Flow<List<ConversationEntity>> {
         return conversationDao.getConversations(isArchived, isSpam)

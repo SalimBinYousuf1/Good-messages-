@@ -188,6 +188,13 @@ class ConversationListViewModel(application: Application) : AndroidViewModel(app
         }
     }
 
+    fun syncRealMessages() {
+        viewModelScope.launch {
+            repository.syncRealSystemMessages()
+            refreshPermissions()
+        }
+    }
+
     fun simulateIncomingSms(sender: String, message: String) {
         viewModelScope.launch {
             repository.onIncomingSmsReceived(sender, message)

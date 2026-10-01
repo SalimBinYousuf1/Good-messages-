@@ -86,21 +86,21 @@ fun SalimApp(
     // Permission Launchers
     val smsPermissionsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        conversationListViewModel.refreshPermissions()
+    ) { _ ->
+        conversationListViewModel.syncRealMessages()
     }
 
     val contactsPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        conversationListViewModel.refreshPermissions()
+    ) { _ ->
+        conversationListViewModel.syncRealMessages()
     }
 
     // Default SMS Role Launcher
     val defaultSmsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        conversationListViewModel.refreshPermissions()
+    ) { _ ->
+        conversationListViewModel.syncRealMessages()
     }
 
     val requestAllSmsPermissions = {
@@ -125,6 +125,21 @@ fun SalimApp(
         if (intent != null) {
             defaultSmsLauncher.launch(intent)
         }
+    }
+
+    // Automatically request permissions once on startup and sync real messages
+    LaunchedEffect(Unit) {
+        val permissions = mutableListOf(
+            android.Manifest.permission.SEND_SMS,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.RECEIVE_SMS,
+            android.Manifest.permission.READ_CONTACTS
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+        smsPermissionsLauncher.launch(permissions.toTypedArray())
+        conversationListViewModel.syncRealMessages()
     }
 
     // Handle initial intent (e.g. from notification or sendto: external intent)
@@ -162,10 +177,6 @@ fun SalimApp(
                 onToggleSpam = { conversationListViewModel.toggleSpam(it) },
                 onDeleteConversation = { conversationListViewModel.deleteConversation(it) },
                 onComposeClicked = { currentScreen = Screen.NewMessage },
-                onSetDefaultClicked = requestDefaultSmsApp,
-                onDismissDefaultBanner = { conversationListViewModel.dismissDefaultBanner() },
-                onRequestSmsPermissions = requestAllSmsPermissions,
-                onRequestContactsPermissions = requestContactsPermission,
                 onOpenScheduled = { currentScreen = Screen.ScheduledMessages },
                 onOpenBlocked = { currentScreen = Screen.BlockedNumbers },
                 onOpenSettings = { currentScreen = Screen.Settings },
@@ -174,6 +185,9 @@ fun SalimApp(
                 },
                 onSeedDemoChats = {
                     conversationListViewModel.seedDemoConversations()
+                },
+                onRefreshRealMessages = {
+                    conversationListViewModel.syncRealMessages()
                 }
             )
         }

@@ -52,4 +52,10 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages WHERE conversationId = :conversationId ORDER BY timestamp DESC LIMIT 1")
     suspend fun getLatestMessageForConversation(conversationId: Long): MessageEntity?
+
+    @Query("SELECT COUNT(*) FROM messages WHERE timestamp = :timestamp AND body = :body")
+    suspend fun messageExists(timestamp: Long, body: String): Int
+
+    @Query("DELETE FROM messages WHERE senderAddress LIKE '%555%' OR recipientAddress LIKE '%555%' OR senderAddress = '88900' OR recipientAddress = '88900'")
+    suspend fun deleteDemoMessages()
 }

@@ -102,7 +102,7 @@
         <!-- Receivers for Sent and Delivery Status PendingIntents -->
         <receiver
             android:name=".receiver.SmsSentStatusReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.example.salim.SMS_SENT_ACTION" />
             </intent-filter>
@@ -110,7 +110,7 @@
 
         <receiver
             android:name=".receiver.SmsDeliveredStatusReceiver"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.example.salim.SMS_DELIVERED_ACTION" />
             </intent-filter>

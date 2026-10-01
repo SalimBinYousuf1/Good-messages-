@@ -59,6 +59,9 @@ interface ConversationDao {
     @Query("DELETE FROM conversations WHERE id = :id")
     suspend fun deleteConversationById(id: Long)
 
+    @Query("DELETE FROM conversations WHERE recipientAddress LIKE '%555%' OR recipientAddress = '88900'")
+    suspend fun deleteDemoConversations()
+
     @Query("""
         SELECT * FROM conversations 
         WHERE (recipientName LIKE '%' || :query || '%' OR recipientAddress LIKE '%' || :query || '%' OR lastMessageSnippet LIKE '%' || :query || '%')

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -69,15 +70,12 @@ fun ConversationListScreen(
     onToggleSpam: (com.example.data.model.ConversationEntity) -> Unit,
     onDeleteConversation: (Long) -> Unit,
     onComposeClicked: () -> Unit,
-    onSetDefaultClicked: () -> Unit,
-    onDismissDefaultBanner: () -> Unit,
-    onRequestSmsPermissions: () -> Unit,
-    onRequestContactsPermissions: () -> Unit,
     onOpenScheduled: () -> Unit,
     onOpenBlocked: () -> Unit,
     onOpenSettings: () -> Unit,
     onSimulateIncomingSms: (String, String) -> Unit,
-    onSeedDemoChats: () -> Unit
+    onSeedDemoChats: () -> Unit,
+    onRefreshRealMessages: () -> Unit = {}
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showSimulatorDialog by remember { mutableStateOf(false) }
@@ -181,6 +179,14 @@ fun ConversationListScreen(
                                 leadingIcon = { Icon(Icons.Default.Block, contentDescription = null) }
                             )
                             DropdownMenuItem(
+                                text = { Text("Sync Phone Messages") },
+                                onClick = {
+                                    showMenu = false
+                                    onRefreshRealMessages()
+                                },
+                                leadingIcon = { Icon(Icons.Default.Refresh, contentDescription = null) }
+                            )
+                            DropdownMenuItem(
                                 text = { Text("Archived (${state.archivedCount})") },
                                 onClick = {
                                     showMenu = false
@@ -242,29 +248,6 @@ fun ConversationListScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Permission Warnings
-            if (!state.hasSmsPermission) {
-                PermissionWarningBanner(
-                    title = "SMS Permissions Required",
-                    description = "Grant SMS permissions to view, receive, and send text messages.",
-                    onGrantClicked = onRequestSmsPermissions
-                )
-            } else if (!state.hasContactsPermission) {
-                PermissionWarningBanner(
-                    title = "Contacts Access",
-                    description = "Allow contacts access to display contact names and pictures.",
-                    onGrantClicked = onRequestContactsPermissions
-                )
-            }
-
-            // Default App Banner
-            if (state.showDefaultBanner) {
-                DefaultAppBanner(
-                    onSetDefaultClicked = onSetDefaultClicked,
-                    onDismissClicked = onDismissDefaultBanner
-                )
-            }
-
             // Filter Chips
             LazyRow(
                 modifier = Modifier
