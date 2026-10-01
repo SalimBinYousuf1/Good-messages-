@@ -1,0 +1,6 @@
+{
+  "name": "Salim",
+  "description": "Production-ready SMS & MMS messaging app with threaded conversations, delivery receipts, contact search, scheduled messages, and spam filtering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
